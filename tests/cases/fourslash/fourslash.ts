@@ -162,7 +162,7 @@ declare namespace FourSlashInterface {
             errorCode?: number,
             index?: number,
         });
-        codeFixAvailable(): void;
+        codeFixAvailable(options: Array<{ description: string, actions: Array<{ type: string, data: {} }> }>): void;
         applicableRefactorAvailableAtMarker(markerName: string): void;
         codeFixDiagnosticsAvailableAtMarkers(markerNames: string[], diagnosticCode?: number): void;
         applicableRefactorAvailableForRange(): void;

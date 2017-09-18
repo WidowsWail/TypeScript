@@ -2750,15 +2750,25 @@ Actual: ${stringify(fullActual)}`);
             }
         }
 
-        public verifyCodeFixAvailable(negative: boolean) {
-            const codeFix = this.getCodeFixActions(this.activeFile.fileName);
+        public verifyCodeFixAvailable(negative: boolean, info?: Array<{ description: string, actions: Array<{ type: string, data: {} }> }>) {
+            const codeFixes = this.getCodeFixActions(this.activeFile.fileName);
 
-            if (negative && codeFix.length) {
-                this.raiseError(`verifyCodeFixAvailable failed - expected no fixes but found one.`);
+            if (negative) {
+                if (codeFixes.length) {
+                    this.raiseError(`verifyCodeFixAvailable failed - expected no fixes but found one.`);
+                }
+                return;
             }
 
-            if (!(negative || codeFix.length)) {
+            if (!codeFixes.length) {
                 this.raiseError(`verifyCodeFixAvailable failed - expected code fixes but none found.`);
+            }
+            if (info) {
+                assert.equal(info.length, codeFixes.length); //neater
+                ts.zipWith(codeFixes, info, (fix, info) => {
+                    assert.equal(fix.description, info.description);
+                    this.assertObjectsEqual(fix.actions, info.actions);
+                });
             }
         }
 

@@ -73,6 +73,9 @@ namespace ts.projectSystem {
         tryGetRegistry(): Map<void> | undefined {
             throw new Error("TODO");
         }
+        installPackage(_fileName: string, _packageName: string): void {
+            throw new Error("TODO");
+        }
 
         executePendingCommands() {
             const actionsToRun = this.postExecActions;

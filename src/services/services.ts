@@ -1761,7 +1761,7 @@ namespace ts {
             });
         }
 
-        function applyCodeFixAction(fileName: Path, action: CodeActionAction): void {
+        function applyCodeFixCommand(fileName: Path, action: CodeActionCommand): void {
             switch (action.type) {
                 case "install package":
                     host.installPackage({
@@ -2047,7 +2047,7 @@ namespace ts {
             isValidBraceCompletionAtPosition,
             getSpanOfEnclosingComment,
             getCodeFixesAtPosition,
-            applyCodeFixAction,
+            applyCodeFixCommand,
             getEmitOutput,
             getNonBoundSourceFile,
             getSourceFile,

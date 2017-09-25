@@ -2754,7 +2754,7 @@ Actual: ${stringify(fullActual)}`);
             }
         }
 
-        public verifyCodeFixAvailable(negative: boolean, info?: Array<{ description: string, commands?: Array<ts.CodeActionCommand> }>) {
+        public verifyCodeFixAvailable(negative: boolean, info: FourSlashInterface.VerifyCodeFixAvailableOptions[] | undefined) {
             const codeFixes = this.getCodeFixActions(this.activeFile.fileName);
 
             if (negative) {
@@ -3770,8 +3770,8 @@ namespace FourSlashInterface {
             this.state.verifyCodeFix(options);
         }
 
-        public codeFixAvailable() {
-            this.state.verifyCodeFixAvailable(this.negative);
+        public codeFixAvailable(options?: VerifyCodeFixAvailableOptions[]) {
+            this.state.verifyCodeFixAvailable(this.negative, options);
         }
 
         public applicableRefactorAvailableAtMarker(markerName: string) {
@@ -4421,5 +4421,10 @@ namespace FourSlashInterface {
         newRangeContent?: string;
         errorCode?: number;
         index?: number;
+    }
+
+    export interface VerifyCodeFixAvailableOptions {
+        description: string;
+        commands?: ts.CodeActionCommand[];
     }
 }

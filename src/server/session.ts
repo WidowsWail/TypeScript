@@ -411,19 +411,20 @@ namespace ts.server {
             this.send(ev);
         }
 
-        public output(info: any, cmdName: string, reqSeq = 0, errorMsg?: string) {
+        //todo: this was apparently public?
+        public output(info: {} | undefined, cmdName: string, reqSeq: number, success: boolean, message?: string) {
             const res: protocol.Response = {
                 seq: 0,
                 type: "response",
                 command: cmdName,
                 request_seq: reqSeq,
-                success: !errorMsg,
+                success,
             };
-            if (!errorMsg) {
+            if (info) {
                 res.body = info;
             }
             else {
-                res.message = errorMsg;
+                res.message = message;
             }
             this.send(res);
         }
@@ -1302,7 +1303,7 @@ namespace ts.server {
             this.changeSeq++;
             // make sure no changes happen before this one is finished
             if (project.reloadScript(file, tempFileName)) {
-                this.output(undefined, CommandNames.Reload, reqSeq);
+                this.output(undefined, CommandNames.Reload, reqSeq, /*success*/ true);
             }
         }
 
@@ -1540,9 +1541,10 @@ namespace ts.server {
             }
         }
 
-        private applyCodeFixCommand(args: protocol.ApplyCodeFixCommandRequestArgs): protocol.ApplyCodeFixCommandResponse {
-            args;
-            throw new Error("TODO");
+        private applyCodeFixCommand(args: protocol.ApplyCodeFixCommandRequestArgs): { response: {}, successMessage: string } {
+            const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
+            const { successMessage } = project.getLanguageService().applyCodeFixCommand(file, args.action);
+            return { response: {}, successMessage };
         }
 
         private getStartAndEndPosition(args: protocol.FileRangeRequestArgs, scriptInfo: ScriptInfo) {
@@ -1661,15 +1663,15 @@ namespace ts.server {
         exit() {
         }
 
-        private notRequired() {
+        private notRequired(): Handled {
             return { responseRequired: false };
         }
 
-        private requiredResponse(response: any) {
-            return { response, responseRequired: true };
+        private requiredResponse(response: {}, successMessage?: string): Handled {
+            return { response, responseRequired: true, successMessage };
         }
 
-        private handlers = createMapFromTemplate<(request: protocol.Request) => { response?: any, responseRequired?: boolean }>({
+        private handlers = createMapFromTemplate<(request: protocol.Request) => Handled>({
             [CommandNames.OpenExternalProject]: (request: protocol.OpenExternalProjectRequest) => {
                 this.projectService.openExternalProject(request.arguments, /*suppressRefreshOfInferredProjects*/ false);
                 // TODO: report errors
@@ -1847,7 +1849,7 @@ namespace ts.server {
             },
             [CommandNames.Configure]: (request: protocol.ConfigureRequest) => {
                 this.projectService.setHostConfiguration(request.arguments);
-                this.output(undefined, CommandNames.Configure, request.seq);
+                this.output(undefined, CommandNames.Configure, request.seq, /*success*/ true);
                 return this.notRequired();
             },
             [CommandNames.Reload]: (request: protocol.ReloadRequest) => {
@@ -1915,7 +1917,8 @@ namespace ts.server {
                 return this.requiredResponse(this.getCodeFixes(request.arguments, /*simplifiedResult*/ false));
             },
             [CommandNames.ApplyCodeFixCommand]: (request: protocol.ApplyCodeFixCommandRequest) => {
-                return this.requiredResponse(this.applyCodeFixCommand(request.arguments));
+                const { response, successMessage } = this.applyCodeFixCommand(request.arguments);
+                return this.requiredResponse(response, successMessage);
             },
             [CommandNames.GetSupportedCodeFixes]: () => {
                 return this.requiredResponse(this.getSupportedCodeFixes());
@@ -1931,7 +1934,7 @@ namespace ts.server {
             }
         });
 
-        public addProtocolHandler(command: string, handler: (request: protocol.Request) => { response?: any, responseRequired: boolean }) {
+        public addProtocolHandler(command: string, handler: (request: protocol.Request) => Handled) {
             if (this.handlers.has(command)) {
                 throw new Error(`Protocol handler already exists for command "${command}"`);
             }
@@ -1960,14 +1963,14 @@ namespace ts.server {
             }
         }
 
-        public executeCommand(request: protocol.Request): { response?: any, responseRequired?: boolean } {
+        public executeCommand(request: protocol.Request): Handled {
             const handler = this.handlers.get(request.command);
             if (handler) {
                 return this.executeWithRequestId(request.seq, () => handler(request));
             }
             else {
                 this.logger.msg(`Unrecognized JSON command: ${JSON.stringify(request)}`, Msg.Err);
-                this.output(undefined, CommandNames.Unknown, request.seq, `Unrecognized JSON command: ${request.command}`);
+                this.output(undefined, CommandNames.Unknown, request.seq, /*success*/ false, `Unrecognized JSON command: ${request.command}`);
                 return { responseRequired: false };
             }
         }
@@ -1985,7 +1988,7 @@ namespace ts.server {
             let request: protocol.Request;
             try {
                 request = <protocol.Request>JSON.parse(message);
-                const { response, responseRequired } = this.executeCommand(request);
+                const { response, responseRequired, successMessage } = this.executeCommand(request);
 
                 if (this.logger.hasLevel(LogLevel.requestTime)) {
                     const elapsedTime = hrTimeToMilliseconds(this.hrtime(start)).toFixed(4);
@@ -1993,21 +1996,22 @@ namespace ts.server {
                         this.logger.perftrc(`${request.seq}::${request.command}: elapsed time (in milliseconds) ${elapsedTime}`);
                     }
                     else {
+                        //... responseRequired has nothing to do with async ...
                         this.logger.perftrc(`${request.seq}::${request.command}: async elapsed time (in milliseconds) ${elapsedTime}`);
                     }
                 }
 
                 if (response) {
-                    this.output(response, request.command, request.seq);
+                    this.output(response, request.command, request.seq, /*success*/ true, successMessage);
                 }
                 else if (responseRequired) {
-                    this.output(undefined, request.command, request.seq, "No content available.");
+                    this.output(undefined, request.command, request.seq, /*success*/ false, "No content available.");
                 }
             }
             catch (err) {
                 if (err instanceof OperationCanceledException) {
                     // Handle cancellation exceptions
-                    this.output({ canceled: true }, request.command, request.seq);
+                    this.output({ canceled: true }, request.command, request.seq, /*success*/ true);
                     return;
                 }
                 this.logError(err, message);
@@ -2015,8 +2019,16 @@ namespace ts.server {
                     undefined,
                     request ? request.command : CommandNames.Unknown,
                     request ? request.seq : 0,
+                    /*success*/ false,
                     "Error processing request. " + (<StackTraceError>err).message + "\n" + (<StackTraceError>err).stack);
             }
         }
+    }
+
+    //mv
+    export interface Handled {
+        response?: {};
+        responseRequired?: boolean;
+        successMessage?: string; //used for success
     }
 }

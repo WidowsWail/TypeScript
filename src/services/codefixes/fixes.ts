@@ -9,7 +9,6 @@
 /// <reference path="fixConstructorForDerivedNeedSuperCall.ts" />
 /// <reference path="fixExtendsInterfaceBecomesImplements.ts" />
 /// <reference path="fixForgottenThisPropertyAccess.ts" />
-/// <reference path="fixNonsense.ts" />
 /// <reference path='fixUnusedIdentifier.ts' />
 /// <reference path='fixJSDocTypes.ts' />
 /// <reference path='importFixes.ts' />

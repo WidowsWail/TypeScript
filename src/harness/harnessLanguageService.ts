@@ -190,7 +190,6 @@ namespace Harness.LanguageService {
             return this.typesRegistry;
         }
         installPackage = ts.notImplemented;
-        writeFile = ts.notImplemented; //kill
 
         getCompilationSettings() { return this.settings; }
         getCancellationToken() { return this.cancellationToken; }

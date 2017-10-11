@@ -1767,20 +1767,10 @@ namespace ts {
                     return host.installPackage({
                         fileName: toPath(fileName, currentDirectory, getCanonicalFileName),
                         packageName: action.packageName,
-                        //tsconfigLocation: action.tsconfigLocation,
                     });
-                case "nonsense": {
-                    const nonsensePath = combinePaths(getDirectoryPath(fileName), "nonsense.d.ts");
-                    if (host.fileExists(nonsensePath)) {
-                        throw new Error(`File already exists: ${nonsensePath}`);
-                    }
-                    else {
-                        host.writeFile(nonsensePath, "declare var nonsense: any;\n");
-                        return MyPromiseLike.resolved({ successMessage: `Wrote file ${nonsensePath}` });
-                    }
-                }
                 default:
-                    Debug.assertNever(action);
+                    Debug.fail();
+                    // TODO: Debug.assertNever(action); will only work if there is more than one type.
             }
         }
 

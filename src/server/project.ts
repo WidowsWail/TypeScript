@@ -256,10 +256,6 @@ namespace ts.server {
         private get typingsCache(): TypingsCache {
             return this.projectService.typingsCache;
         }
-        //kill
-        writeFile(path: Path, content: string): void {
-            this.directoryStructureHost.writeFile(path, content);
-        }
 
         getCompilationSettings() {
             return this.compilerOptions;

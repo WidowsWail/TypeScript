@@ -73,7 +73,7 @@ declare namespace ts.server {
     }
     //already internal?
     /* @internal */
-    export type TypingInstallerResponseUnion = SetTypings | InvalidateCachedTypings | TypesRegistryResponse | InstallTypes | InitializationFailedResponse;
+    export type TypingInstallerResponseUnion = SetTypings | InvalidateCachedTypings | TypesRegistryResponse | PackageInstalledResponse | InstallTypes | InitializationFailedResponse;
 
     //TODO:are these all internal?
     /* @internal */

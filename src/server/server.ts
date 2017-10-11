@@ -259,7 +259,7 @@ namespace ts.server {
         // buffer, but we have yet to find a way to retrieve that value.
         private static readonly maxActiveRequestCount = 10;
         private static readonly requestDelayMillis = 100;
-        private packageInstalledPromise: MyPromiseLike<ApplyCodeFixCommandResult>;
+        private packageInstalledPromise: PromiseImpl<ApplyCodeFixCommandResult>;
 
         constructor(
             private readonly telemetryEnabled: boolean,
@@ -291,7 +291,7 @@ namespace ts.server {
         installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult> {
             this.send({ kind: "installPackage", ...options });
             Debug.assert(this.packageInstalledPromise === undefined);
-            this.packageInstalledPromise = MyPromiseLike.deferred();
+            this.packageInstalledPromise = PromiseImpl.deferred();
             return this.packageInstalledPromise;
         }
 

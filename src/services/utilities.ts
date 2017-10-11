@@ -1088,23 +1088,11 @@ namespace ts {
     }
 
 
-    //!
-    /*export class Deferred<T> {
-        readonly promise: PromiseLike<T>;
-        readonly resolve: (value: T) => void;
-        readonly reject: (reason: any) => void;
-
-        constructor() {
-            this.promise = MyPromiseLike.of((resolve, reject) => {
-                this.resolve = resolve;
-                this.reject = reject;
-            });
-        }
-    }*/
-
     const enum PromiseState { Unresolved, Success, Failure }
-    //!
-    export class MyPromiseLike<T> {
+    /**
+     * Cheap PromiseLike implementation.
+     */
+    export class PromiseImpl<T> implements PromiseLike<T> {
         private constructor(
             private state: PromiseState,
             private result: T | undefined,
@@ -1115,21 +1103,12 @@ namespace ts {
                 onrejected?: ((reason: any) => {}) | undefined | null
             } | undefined) {}
 
-        static deferred<T>(): MyPromiseLike<T> {
-            return new MyPromiseLike(PromiseState.Unresolved, undefined, undefined, undefined);
+        static deferred<T>(): PromiseImpl<T> {
+            return new PromiseImpl(PromiseState.Unresolved, undefined, undefined, undefined);
         }
 
-        //kill?
-        static of<T>(handler: (resolve: (value: T) => void, reject: (reason: any) => void) => void) {
-            const res = this.deferred();
-            handler(
-                value => res.resolve(value),
-                value => res.reject(value));
-            return res;
-        }
-
-        static resolved<T>(value: T): MyPromiseLike<T> {
-            return new MyPromiseLike<T>(PromiseState.Success, value, undefined, undefined);
+        static resolved<T>(value: T): PromiseImpl<T> {
+            return new PromiseImpl<T>(PromiseState.Success, value, undefined, undefined);
         }
 
         resolve(value: T): void {
@@ -1159,7 +1138,7 @@ namespace ts {
                 case PromiseState.Unresolved:
                     Debug.assert(!this.callback);
                     this.callback = { onfulfilled, onrejected };
-                    new MyPromiseLike(PromiseState.Unresolved, undefined, undefined, undefined);
+                    new PromiseImpl(PromiseState.Unresolved, undefined, undefined, undefined);
                 case PromiseState.Success:
                     return toPromiseLike(onfulfilled(this.result));
                 case PromiseState.Failure:
@@ -1169,7 +1148,7 @@ namespace ts {
     }
 
     function toPromiseLike<T>(x: T | PromiseLike<T>): PromiseLike<T> {
-        return (x as any).then ? x as PromiseLike<T> : MyPromiseLike.resolved(x as T);
+        return (x as any).then ? x as PromiseLike<T> : PromiseImpl.resolved(x as T);
     }
 }
 

@@ -356,10 +356,6 @@ namespace ts {
         public getTsconfigLocation(): Path | undefined {
             throw new Error("TODO");
         }
-        //kill
-        public writeFile(): void {
-            throw new Error("TODO");
-        }
 
         public log(s: string): void {
             if (this.loggingEnabled) {

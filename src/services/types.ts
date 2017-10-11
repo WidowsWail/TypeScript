@@ -202,7 +202,6 @@ namespace ts {
 
         /* @internal */
         //TODO: optional (for back-compat)
-        writeFile(file: Path, content: string): void;
         tryGetRegistry(): Map<void> | undefined;
         installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeFixCommandResult>;
         //getTsconfigLocation(): Path | undefined;
@@ -389,20 +388,13 @@ namespace ts {
         commands?: CodeActionCommand[];
     }
 
-    //Publicly, this type is just `{}`. Internally it is a union of all the actions we use.
-    //See `commands?: Array<{}>;` in protocol.ts
-    export type CodeActionCommand = InstallPackageAction | NonsenseAction;
+    // Publicly, this type is just `{}`. Internally it is a union of all the actions we use.
+    // See `commands?: {}[]` in protocol.ts
+    export type CodeActionCommand = InstallPackageAction;
 
-    //TODO: installPackageOptions should derive from this
     export interface InstallPackageAction {
         /* @internal */ type: "install package",
         /* @internal */ packageName: string,
-        //just get it in `installPackage()`
-        ///* @internal */ tsconfigLocation: Path,
-    }
-
-    export interface NonsenseAction {
-        /* @internal */ type: "nonsense";
     }
 
     /**

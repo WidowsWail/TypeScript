@@ -146,10 +146,16 @@ namespace ts.server.typingsInstaller {
                         this.sendResponse(response);
                         break;
                     }
-                    case "installPackage":
-                        //TODO: come up with a requestId?
-                        this.installPackage(-1, req);
+                    case "installPackage": {
+                        const { fileName, packageName, projectRootPath } = req;
+                        const cwd = getDirectoryOfPackageJson(fileName, this.installTypingHost) || projectRootPath;
+                        this.installWorker(-1, [packageName], cwd, success => {
+                            const message = success ? `Package ${packageName} installed.` : `There was an error installing ${packageName}.`;
+                            const response: PackageInstalledResponse = { kind: EventPackageInstalled, success, message };
+                            this.sendResponse(response);
+                        });
                         break;
+                    }
                     default:
                         Debug.assertNever(req);
                 }
@@ -164,18 +170,6 @@ namespace ts.server.typingsInstaller {
             if (this.log.isEnabled()) {
                 this.log.writeLine(`Response has been sent.`);
             }
-        }
-
-        private installPackage(requestId: number, { fileName, packageName, projectRootPath }: InstallPackageOptionsWithProjectRootPath): void {
-            const cwd = getDirectoryOfPackageJson(fileName, this.installTypingHost) || projectRootPath;
-            this.installWorker(requestId, [packageName], cwd, (success) => {
-                if (!success) {
-                    throw new Error("TODO");
-                }
-                //TODO: what to do with errors?
-                console.log("OK, INSTALLED");
-                throw new Error("TODO"); //NOTIFY!
-            });
         }
 
         protected installWorker(requestId: number, packageNames: string[], cwd: string, onRequestCompleted: RequestCompletedAction): void {

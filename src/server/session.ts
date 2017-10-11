@@ -420,10 +420,13 @@ namespace ts.server {
                 request_seq: reqSeq,
                 success,
             };
-            if (info) {
+            if (success) {
                 res.body = info;
             }
             else {
+                Debug.assert(info === undefined);
+            }
+            if (message) {
                 res.message = message;
             }
             this.send(res);

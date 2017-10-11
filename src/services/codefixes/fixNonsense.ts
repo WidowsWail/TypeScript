@@ -1,7 +1,4 @@
 /* @internal */
-//interface Console { log(message?: any, ...optionalParams: any[]): void; }
-//declare var console: Console;
-
 namespace ts.codefix {
     registerCodeFix({
         errorCodes: [

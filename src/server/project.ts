@@ -249,11 +249,9 @@ namespace ts.server {
         tryGetRegistry(): Map<void> | undefined {
             return this.typingsCache.tryGetRegistry();
         }
-        installPackage(options: InstallPackageOptions): ApplyCodeFixCommandResult { //must be async!
-            //misnamed: call it 'projectrootpath' and not 'tsconfigLocation'
-            this.projectKind
-            const tsconfigLocation = this.getProjectRootPath() as Path;
-            return this.typingsCache.installPackage({ ...options, tsconfigLocation });
+        installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeFixCommandResult> {
+            const projectRootPath = this.getProjectRootPath() as Path;
+            return this.typingsCache.installPackage({ ...options, projectRootPath });
         }
         private get typingsCache(): TypingsCache {
             return this.projectService.typingsCache;

@@ -4,7 +4,7 @@ namespace ts.server {
     export interface ITypingsInstaller {
         tryGetRegistry(): Map<void> | undefined;
         //document me
-        installPackage(options: InstallPackageOptionsWithTsconfigLocation): ApplyCodeFixCommandResult; //must be async!
+        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult>;
         enqueueInstallTypingsRequest(p: Project, typeAcquisition: TypeAcquisition, unresolvedImports: SortedReadonlyArray<string>): void;
         attach(projectService: ProjectService): void;
         onProjectClosed(p: Project): void;
@@ -87,7 +87,7 @@ namespace ts.server {
             return this.installer.tryGetRegistry();
         }
 
-        installPackage(options: InstallPackageOptionsWithTsconfigLocation): ApplyCodeFixCommandResult { //must be async!
+        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult> {
             return this.installer.installPackage(options);
         }
 

@@ -57,18 +57,19 @@ declare namespace ts.server {
 
     export interface InstallPackageRequest extends InstallPackageOptions {
         readonly kind: "installPackage";
-        readonly tsconfigLocation: Path;
+        readonly projectRootPath: Path;
     }
 
     export type ActionSet = "action::set";
     export type ActionInvalidate = "action::invalidate";
     export type EventTypesRegistry = "event::typesRegistry";
+    export type EventPackageInstalled = "event::packageInstalled";
     export type EventBeginInstallTypes = "event::beginInstallTypes";
     export type EventEndInstallTypes = "event::endInstallTypes";
     export type EventInitializationFailed = "event::initializationFailed";
 
     export interface TypingInstallerResponse {
-        readonly kind: ActionSet | ActionInvalidate | EventTypesRegistry | EventBeginInstallTypes | EventEndInstallTypes | EventInitializationFailed;
+        readonly kind: ActionSet | ActionInvalidate | EventTypesRegistry | EventPackageInstalled | EventBeginInstallTypes | EventEndInstallTypes | EventInitializationFailed;
     }
     //already internal?
     /* @internal */
@@ -79,6 +80,13 @@ declare namespace ts.server {
     export interface TypesRegistryResponse extends TypingInstallerResponse {
         readonly kind: EventTypesRegistry;
         readonly typesRegistry: MapLike<void>;
+    }
+
+    /* @internal */
+    export interface PackageInstalledResponse extends TypingInstallerResponse {
+        readonly kind: EventPackageInstalled;
+        readonly success: boolean;
+        readonly message: string;
     }
 
     export interface InitializationFailedResponse extends TypingInstallerResponse {

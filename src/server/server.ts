@@ -259,6 +259,7 @@ namespace ts.server {
         // buffer, but we have yet to find a way to retrieve that value.
         private static readonly maxActiveRequestCount = 10;
         private static readonly requestDelayMillis = 100;
+        private packageInstalledPromise: MyPromiseLike<ApplyCodeFixCommandResult>;
 
         constructor(
             private readonly telemetryEnabled: boolean,
@@ -287,9 +288,11 @@ namespace ts.server {
             return undefined;
         }
 
-        installPackage(options: InstallPackageOptionsWithTsconfigLocation): ApplyCodeFixCommandResult { //return a Promise?
+        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult> {
             this.send({ kind: "installPackage", ...options });
-            throw new Error("TODO"); //Need to add stuff to handle an async result... return something like a Promise?
+            Debug.assert(this.packageInstalledPromise === undefined);
+            this.packageInstalledPromise = MyPromiseLike.deferred();
+            return this.packageInstalledPromise;
         }
 
         private reportInstallerProcessId() {
@@ -393,17 +396,25 @@ namespace ts.server {
             }
         }
 
-        private handleMessage(response: TypesRegistryResponse | SetTypings | InvalidateCachedTypings | BeginInstallTypes | EndInstallTypes | InitializationFailedResponse) {
+        private handleMessage(response: TypesRegistryResponse | PackageInstalledResponse | SetTypings | InvalidateCachedTypings | BeginInstallTypes | EndInstallTypes | InitializationFailedResponse) {
             if (this.logger.hasLevel(LogLevel.verbose)) {
                 this.logger.info(`Received response: ${JSON.stringify(response)}`);
             }
 
             switch (response.kind) {
-                case EventTypesRegistry: {
+                case EventTypesRegistry:
                     this.typesRegistryCache = ts.createMapFromTemplate(response.typesRegistry);
-                    //TODO: better logging
-                    console.log("Got back the types registry!");
-                    console.log(response.typesRegistry);
+                    //TODO: logging?
+                    break;
+                case EventPackageInstalled: {
+                    const { success, message } = response;
+                    if (success) {
+                        this.packageInstalledPromise.resolve({ successMessage: message });
+                    }
+                    else {
+                        this.packageInstalledPromise.reject(message);
+                    }
+                    this.packageInstalledPromise = undefined;
                     break;
                 }
                 case EventInitializationFailed:

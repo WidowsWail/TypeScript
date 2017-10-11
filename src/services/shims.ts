@@ -350,7 +350,7 @@ namespace ts {
         public tryGetRegistry(): Map<void> | undefined {
             throw new Error("TODO");
         }
-        public installPackage(_options: InstallPackageOptions): ApplyCodeFixCommandResult {
+        public installPackage(_options: InstallPackageOptions): PromiseLike<ApplyCodeFixCommandResult> {
             throw new Error("TODO");
         }
         public getTsconfigLocation(): Path | undefined {

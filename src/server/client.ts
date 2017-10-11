@@ -540,14 +540,14 @@ namespace ts.server {
             return response.body.map(entry => this.convertCodeActions(entry, file));
         }
 
-        applyCodeFixCommand(file: string, command: CodeActionCommand): ApplyCodeFixCommandResult {
+        applyCodeFixCommand(file: string, command: CodeActionCommand): PromiseLike<ApplyCodeFixCommandResult> {
             const args: protocol.ApplyCodeFixCommandRequestArgs = { file, command };
 
             const request = this.processRequest<protocol.ApplyCodeFixCommandRequest>(CommandNames.ApplyCodeFixCommand, args);
             const response = this.processResponse<protocol.ApplyCodeFixCommandResponse>(request);
 
             //This would have thrown an error in `processResponse` if not `response.success`.
-            return { successMessage: response.message };
+            return MyPromiseLike.resolved({ successMessage: response.message });
         }
 
         private createFileLocationOrRangeRequestArgs(positionOrRange: number | TextRange, fileName: string): protocol.FileLocationOrRangeRequestArgs {

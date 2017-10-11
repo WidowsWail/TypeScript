@@ -1086,6 +1086,91 @@ namespace ts {
             return !seen[id] && (seen[id] = true);
         };
     }
+
+
+    //!
+    /*export class Deferred<T> {
+        readonly promise: PromiseLike<T>;
+        readonly resolve: (value: T) => void;
+        readonly reject: (reason: any) => void;
+
+        constructor() {
+            this.promise = MyPromiseLike.of((resolve, reject) => {
+                this.resolve = resolve;
+                this.reject = reject;
+            });
+        }
+    }*/
+
+    const enum PromiseState { Unresolved, Success, Failure }
+    //!
+    export class MyPromiseLike<T> {
+        private constructor(
+            private state: PromiseState,
+            private result: T | undefined,
+            private error: {} | undefined,
+            //Only supports one callback...
+            private callback: {
+                onfulfilled?: ((value: T) => {}) | undefined | null,
+                onrejected?: ((reason: any) => {}) | undefined | null
+            } | undefined) {}
+
+        static deferred<T>(): MyPromiseLike<T> {
+            return new MyPromiseLike(PromiseState.Unresolved, undefined, undefined, undefined);
+        }
+
+        //kill?
+        static of<T>(handler: (resolve: (value: T) => void, reject: (reason: any) => void) => void) {
+            const res = this.deferred();
+            handler(
+                value => res.resolve(value),
+                value => res.reject(value));
+            return res;
+        }
+
+        static resolved<T>(value: T): MyPromiseLike<T> {
+            return new MyPromiseLike<T>(PromiseState.Success, value, undefined, undefined);
+        }
+
+        resolve(value: T): void {
+            Debug.assert(this.state === PromiseState.Unresolved);
+            this.state = PromiseState.Success;
+            this.result = value;
+            if (this.callback) {
+                this.callback.onfulfilled(value);
+                this.callback = undefined;
+            }
+        }
+
+        reject(value: {}): void {
+            this.state = PromiseState.Failure;
+            this.error = value;
+            if (this.callback) {
+                this.callback.onrejected(value);
+                this.callback = undefined;
+            }
+        }
+
+        then<TResult1 = T, TResult2 = never>(
+            onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+            onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null,
+        ): PromiseLike<TResult1 | TResult2> {
+            switch (this.state) {
+                case PromiseState.Unresolved:
+                    Debug.assert(!this.callback);
+                    this.callback = { onfulfilled, onrejected };
+                    new MyPromiseLike(PromiseState.Unresolved, undefined, undefined, undefined);
+                case PromiseState.Success:
+                    return toPromiseLike(onfulfilled(this.result));
+                case PromiseState.Failure:
+                    return toPromiseLike(onrejected(this.error));
+            }
+        }
+    }
+
+    function toPromiseLike<T>(x: T | PromiseLike<T>): PromiseLike<T> {
+        return (x as any).then ? x as PromiseLike<T> : MyPromiseLike.resolved(x as T);
+    }
 }
 
 // Display-part writer helpers

@@ -1556,7 +1556,7 @@ namespace ts.server.protocol {
         description: string;
         /** Text changes to apply to each file as part of the code action */
         changes: FileCodeEdits[];
-        commands?: Array<{}>;
+        commands?: {}[];
     }
 
     /**

@@ -74,7 +74,7 @@ namespace ts.projectSystem {
         tryGetRegistry(): Map<void> | undefined {
             throw new Error("TODO");
         }
-        installPackage(_options: InstallPackageOptionsWithTsconfigLocation): never {
+        installPackage(): never {
             throw new Error("TODO");
         }
 

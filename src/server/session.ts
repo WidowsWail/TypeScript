@@ -1546,7 +1546,19 @@ namespace ts.server {
 
         private applyCodeFixCommand(args: protocol.ApplyCodeFixCommandRequestArgs): { response: {}, successMessage: string } {
             const { file, project } = this.getFileAndProject(args);
-            const { successMessage } = project.getLanguageService().applyCodeFixCommand(file, args.command);
+            const promise = project.getLanguageService().applyCodeFixCommand(file, args.command);
+            //make it synchronous for now
+            let result: ApplyCodeFixCommandResult;
+            promise.then(
+                x => {
+                    Debug.assert(!!x);
+                    result = x;
+                },
+                err => {
+                    throw err;
+                });
+            while (!result) {}
+            const { successMessage } = result;
             return { response: {}, successMessage };
         }
 

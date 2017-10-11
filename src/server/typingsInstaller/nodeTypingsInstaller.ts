@@ -166,15 +166,15 @@ namespace ts.server.typingsInstaller {
             }
         }
 
-        private installPackage(requestId: number, { fileName, packageName, tsconfigLocation }: InstallPackageOptionsWithTsconfigLocation): void {
-            //TODO: maybe we should limit the search to the just up to the parent directory of `tsconfig.json`?
-            const cwd = getDirectoryOfPackageJson(fileName, this.installTypingHost) || getDirectoryPath(tsconfigLocation);
+        private installPackage(requestId: number, { fileName, packageName, projectRootPath }: InstallPackageOptionsWithProjectRootPath): void {
+            const cwd = getDirectoryOfPackageJson(fileName, this.installTypingHost) || projectRootPath;
             this.installWorker(requestId, [packageName], cwd, (success) => {
                 if (!success) {
                     throw new Error("TODO");
                 }
                 //TODO: what to do with errors?
                 console.log("OK, INSTALLED");
+                throw new Error("TODO"); //NOTIFY!
             });
         }
 

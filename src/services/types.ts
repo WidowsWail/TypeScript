@@ -204,7 +204,7 @@ namespace ts {
         //TODO: optional (for back-compat)
         writeFile(file: Path, content: string): void;
         tryGetRegistry(): Map<void> | undefined;
-        installPackage(options: InstallPackageOptions): ApplyCodeFixCommandResult; //must be async!
+        installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeFixCommandResult>;
         //getTsconfigLocation(): Path | undefined;
     }
 
@@ -285,7 +285,7 @@ namespace ts {
         //TODO: this will be public, so think about api
         //Or just make it internal.
         //currently: returns success message, or throws error for error message
-        applyCodeFixCommand(fileName: string, action: CodeActionCommand): ApplyCodeFixCommandResult;
+        applyCodeFixCommand(fileName: string, action: CodeActionCommand): PromiseLike<ApplyCodeFixCommandResult>;
         getApplicableRefactors(fileName: string, positionOrRaneg: number | TextRange): ApplicableRefactorInfo[];
         getEditsForRefactor(fileName: string, formatOptions: FormatCodeSettings, positionOrRange: number | TextRange, refactorName: string, actionName: string): RefactorEditInfo | undefined;
 
@@ -386,7 +386,7 @@ namespace ts {
          * If the user accepts the code fix, the editor should send the action back in a `applyAction` request.
          * This allows the language service to have side effects (e.g. installing dependencies) upon a code fix.
          */
-        commands?: Array<CodeActionCommand>;
+        commands?: CodeActionCommand[];
     }
 
     //Publicly, this type is just `{}`. Internally it is a union of all the actions we use.

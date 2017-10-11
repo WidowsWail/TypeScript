@@ -189,7 +189,6 @@ namespace Harness.LanguageService {
             }
             return this.typesRegistry;
         }
-        //getTsconfigLocation() {};
         installPackage = ts.notImplemented;
         writeFile = ts.notImplemented; //kill
 
@@ -504,7 +503,7 @@ namespace Harness.LanguageService {
         getCodeFixesAtPosition(): ts.CodeAction[] {
             throw new Error("Not supported on the shim.");
         }
-        applyCodeFixCommand(): ts.ApplyCodeFixCommandResult {
+        applyCodeFixCommand(): PromiseLike<ts.ApplyCodeFixCommandResult> {
             throw new Error("Not supported on the shim.");
         }
         getCodeFixDiagnostics(): ts.Diagnostic[] {

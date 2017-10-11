@@ -1761,7 +1761,7 @@ namespace ts {
             });
         }
 
-        function applyCodeFixCommand(fileName: Path, action: CodeActionCommand): ApplyCodeFixCommandResult {
+        function applyCodeFixCommand(fileName: Path, action: CodeActionCommand): PromiseLike<ApplyCodeFixCommandResult> {
             switch (action.type) {
                 case "install package":
                     return host.installPackage({
@@ -1776,7 +1776,7 @@ namespace ts {
                     }
                     else {
                         host.writeFile(nonsensePath, "declare var nonsense: any;\n");
-                        return { successMessage: `Wrote file ${nonsensePath}` };
+                        return MyPromiseLike.resolved({ successMessage: `Wrote file ${nonsensePath}` });
                     }
                 }
                 default:

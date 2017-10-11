@@ -2943,7 +2943,8 @@ namespace ts {
         packageName: string;
     }
 
-    export interface InstallPackageOptionsWithTsconfigLocation extends InstallPackageOptions {
-        tsconfigLocation: Path;
+    //mv
+    export interface InstallPackageOptionsWithProjectRootPath extends InstallPackageOptions {
+        projectRootPath: Path;
     }
 }

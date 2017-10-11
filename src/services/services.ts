@@ -1983,8 +1983,9 @@ namespace ts {
                 endPosition,
                 program: getProgram(),
                 newLineCharacter: formatOptions ? formatOptions.newLineCharacter : host.getNewLine(),
+                host,
                 rulesProvider: getRuleProvider(formatOptions),
-                cancellationToken
+                cancellationToken,
             };
         }
 

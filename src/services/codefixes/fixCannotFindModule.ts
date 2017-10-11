@@ -14,38 +14,40 @@ namespace ts.codefix {
                 throw Debug.fail(); // These errors should only happen on the module name.
             }
 
-            const packageName = token.text;
-
-            //We want to avoid looking this up in the registry as that is expensive.
-            const validationResult = validatePackageName(packageName);
-            if (validationResult !== PackageNameValidationResult.Ok) {
-                //TODO: this is a debug logging
-                if (context.host.log) {
-                    context.host.log(renderPackageNameValidationFailure(validationResult, packageName));
-                }
-                return undefined;
-            }
-
-            const registry = context.host.tryGetRegistry();
-            if (!registry) {
-                //Registry not available, can't do anything.
-                return undefined;
-            }
-
-            if (!registry.has(packageName)) {
-                return undefined;
-            }
-
-            const action: CodeAction = {
-                description: `Install typings for ${packageName}`,
-                changes: [],
-                commands: [{
-                    type: "install package",
-                    packageName: `@types/${packageName}`,
-                    //tsconfigLocation: context.host.getTsconfigLocation(), //context.program.getCommonSourceDirectory(),
-                }],
-            };
-            return [action];
+            const action = getCodeActionForInstallPackageTypes(context.host, token.text);
+            return action && [action];
         },
     });
+
+    //mv
+    export function getCodeActionForInstallPackageTypes(host: LanguageServiceHost, packageName: string): CodeAction | undefined {
+        //We want to avoid looking this up in the registry as that is expensive.
+        const validationResult = validatePackageName(packageName);
+        if (validationResult !== PackageNameValidationResult.Ok) {
+            //TODO: this is a debug logging
+            if (host.log) {
+                host.log(renderPackageNameValidationFailure(validationResult, packageName));
+            }
+            return undefined;
+        }
+
+        const registry = host.tryGetRegistry();
+        if (!registry) {
+            //Registry not available, can't do anything.
+            return undefined;
+        }
+
+        if (!registry.has(packageName)) {
+            return undefined;
+        }
+
+        return {
+            description: `Install typings for ${packageName}`,
+            changes: [],
+            commands: [{
+                type: "install package",
+                packageName: `@types/${packageName}`,
+            }],
+        };
+    }
 }

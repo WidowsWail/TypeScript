@@ -448,6 +448,8 @@ namespace ts {
         edits: FileTextChanges[];
         renameFilename: string | undefined;
         renameLocation: number | undefined;
+        //new!
+        commands?: CodeActionCommand[];
     }
 
     export interface TextInsertion {

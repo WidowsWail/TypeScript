@@ -1,4 +1,21 @@
 namespace ts {
+    export interface EmitOutput {
+        outputFiles: OutputFile[];
+        emitSkipped: boolean;
+    }
+
+    export interface EmitOutputDetailed extends EmitOutput {
+        diagnostics: Diagnostic[];
+        sourceMaps: SourceMapData[];
+        emittedSourceFiles: SourceFile[];
+    }
+
+    export interface OutputFile {
+        name: string;
+        writeByteOrderMark: boolean;
+        text: string;
+    }
+
     /**
      * Type of objects whose values are all of the same type.
      * The `in` and `for-in` operators can *not* be safely used,

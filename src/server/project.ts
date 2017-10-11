@@ -245,13 +245,11 @@ namespace ts.server {
         /*@internal*/
         protected abstract getProjectRootPath(): Path | undefined;
 
-        //neateR?
         tryGetRegistry(): Map<void> | undefined {
             return this.typingsCache.tryGetRegistry();
         }
         installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeActionCommandResult> {
-            const projectRootPath = this.getProjectRootPath() as Path;
-            return this.typingsCache.installPackage({ ...options, projectRootPath });
+            return this.typingsCache.installPackage({ ...options, projectRootPath: this.getProjectRootPath() });
         }
         private get typingsCache(): TypingsCache {
             return this.projectService.typingsCache;

@@ -1,23 +1,6 @@
 /// <reference path="program.ts" />
 
 namespace ts {
-    export interface EmitOutput {
-        outputFiles: OutputFile[];
-        emitSkipped: boolean;
-    }
-
-    export interface EmitOutputDetailed extends EmitOutput {
-        diagnostics: Diagnostic[];
-        sourceMaps: SourceMapData[];
-        emittedSourceFiles: SourceFile[];
-    }
-
-    export interface OutputFile {
-        name: string;
-        writeByteOrderMark: boolean;
-        text: string;
-    }
-
     export function getFileEmitOutput(program: Program, sourceFile: SourceFile, emitOnlyDtsFiles: boolean, isDetailed: boolean,
         cancellationToken?: CancellationToken, customTransformers?: CustomTransformers): EmitOutput | EmitOutputDetailed {
         const outputFiles: OutputFile[] = [];

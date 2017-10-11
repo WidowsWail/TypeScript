@@ -148,11 +148,17 @@ namespace ts.server.typingsInstaller {
                     case "installPackage": {
                         const { fileName, packageName, projectRootPath } = req;
                         const cwd = getDirectoryOfPackageJson(fileName, this.installTypingHost) || projectRootPath;
-                        this.installWorker(-1, [packageName], cwd, success => {
-                            const message = success ? `Package ${packageName} installed.` : `There was an error installing ${packageName}.`;
-                            const response: PackageInstalledResponse = { kind: EventPackageInstalled, success, message };
+                        if (cwd) {
+                            this.installWorker(-1, [packageName], cwd, success => {
+                                const message = success ? `Package ${packageName} installed.` : `There was an error installing ${packageName}.`;
+                                const response: PackageInstalledResponse = { kind: EventPackageInstalled, success, message };
+                                this.sendResponse(response);
+                            });
+                        }
+                        else {
+                            const response: PackageInstalledResponse = { kind: EventPackageInstalled, success: false, message: "Could not determine a project root path." };
                             this.sendResponse(response);
-                        });
+                        }
                         break;
                     }
                     default:

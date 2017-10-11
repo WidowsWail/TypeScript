@@ -411,7 +411,6 @@ namespace ts.server {
             this.send(ev);
         }
 
-        //todo: this was apparently public? can't change it?
         public output(info: {} | undefined, cmdName: string, reqSeq: number, success: boolean, message?: string) {
             const res: protocol.Response = {
                 seq: 0,

@@ -1,6 +1,7 @@
 /// <reference path="../compiler/types.ts"/>
 /// <reference path="../compiler/sys.ts"/>
 /// <reference path="../services/jsTyping.ts"/>
+/// <reference path="../services/types.ts"/>
 
 declare namespace ts.server {
     export interface CompressedData {

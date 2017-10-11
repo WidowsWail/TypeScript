@@ -52,7 +52,7 @@ namespace ts.refactor.convertFunctionToES6Class {
         const sourceFile = context.file;
         const checker = context.program.getTypeChecker();
         const token = getTokenAtPosition(sourceFile, start, /*includeJsDocComment*/ false);
-        const ctorSymbol = checker.getSymbolAtLocation(token); //this code is dup of code in `getAvailableActions`, fix on master
+        const ctorSymbol = checker.getSymbolAtLocation(token);
         const newLine = context.rulesProvider.getFormatOptions().newLineCharacter;
 
         const deletedNodes: Node[] = [];

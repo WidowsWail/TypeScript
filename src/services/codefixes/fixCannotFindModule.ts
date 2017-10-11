@@ -14,17 +14,15 @@ namespace ts.codefix {
                 throw Debug.fail(); // These errors should only happen on the module name.
             }
 
-            const action = getCodeActionForInstallPackageTypes(context.host, token.text);
+            const action = tryGetCodeActionForInstallPackageTypes(context.host, token.text);
             return action && [action];
         },
     });
 
-    //mv
-    export function getCodeActionForInstallPackageTypes(host: LanguageServiceHost, packageName: string): CodeAction | undefined {
-        //We want to avoid looking this up in the registry as that is expensive.
+    export function tryGetCodeActionForInstallPackageTypes(host: RefactorAndCodeFixHost, packageName: string): CodeAction | undefined {
+        // We want to avoid looking this up in the registry as that is expensive. So first check that it's actually an NPM package.
         const validationResult = validatePackageName(packageName);
         if (validationResult !== PackageNameValidationResult.Ok) {
-            //TODO: this is a debug logging
             if (host.log) {
                 host.log(renderPackageNameValidationFailure(validationResult, packageName));
             }
@@ -32,22 +30,16 @@ namespace ts.codefix {
         }
 
         const registry = host.tryGetRegistry();
-        if (!registry) {
-            //Registry not available, can't do anything.
+        if (!registry || !registry.has(packageName)) {
+            // If !registry, registry not available yet, can't do anything.
             return undefined;
         }
 
-        if (!registry.has(packageName)) {
-            return undefined;
-        }
-
+        const typesPackageName = `@types/${packageName}`;
         return {
-            description: `Install typings for ${packageName}`,
+            description: `Install '${typesPackageName}'`,
             changes: [],
-            commands: [{
-                type: "install package",
-                packageName: `@types/${packageName}`,
-            }],
+            commands: [{ type: "install package", packageName: typesPackageName }],
         };
     }
 }

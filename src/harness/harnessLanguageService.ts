@@ -502,9 +502,7 @@ namespace Harness.LanguageService {
         getCodeFixesAtPosition(): ts.CodeAction[] {
             throw new Error("Not supported on the shim.");
         }
-        applyCodeFixCommand(): PromiseLike<ts.ApplyCodeFixCommandResult> {
-            throw new Error("Not supported on the shim.");
-        }
+        applyCodeActionCommand = ts.notImplemented;
         getCodeFixDiagnostics(): ts.Diagnostic[] {
             throw new Error("Not supported on the shim.");
         }

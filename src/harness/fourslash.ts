@@ -2768,7 +2768,7 @@ Actual: ${stringify(fullActual)}`);
                 this.raiseError(`verifyCodeFixAvailable failed - expected code fixes but none found.`);
             }
             if (info) {
-                assert.equal(info.length, codeFixes.length); //neater
+                assert.equal(info.length, codeFixes.length);
                 ts.zipWith(codeFixes, info, (fix, info) => {
                     assert.equal(fix.description, info.description);
                     this.assertObjectsEqual(fix.commands, info.commands);
@@ -2815,6 +2815,14 @@ Actual: ${stringify(fullActual)}`);
                     this.raiseError(`${refactors.length} available refactors both have name ${name} and action ${actionName}`);
                 }
             }
+        }
+
+        public verifyRefactor({ name, actionName, refactors }: FourSlashInterface.VerifyRefactorOptions) {
+            const selection = this.getSelection();
+
+            const actualRefactors = (this.languageService.getApplicableRefactors(this.activeFile.fileName, selection) || ts.emptyArray)
+                .filter(r => r.name === name && r.actions.some(a => a.name === actionName));
+            this.assertObjectsEqual(actualRefactors, refactors);
         }
 
         public verifyApplicableRefactorAvailableForRange(negative: boolean) {
@@ -3782,6 +3790,10 @@ namespace FourSlashInterface {
             this.state.verifyApplicableRefactorAvailableForRange(this.negative);
         }
 
+        public refactor(options: VerifyRefactorOptions) {
+            this.state.verifyRefactor(options);
+        }
+
         public refactorAvailable(name: string, actionName?: string) {
             this.state.verifyRefactorAvailable(this.negative, name, actionName);
         }
@@ -4426,5 +4438,11 @@ namespace FourSlashInterface {
     export interface VerifyCodeFixAvailableOptions {
         description: string;
         commands?: ts.CodeActionCommand[];
+    }
+
+    export interface VerifyRefactorOptions {
+        name: string;
+        actionName: string;
+        refactors: ts.ApplicableRefactorInfo[];
     }
 }

@@ -97,6 +97,8 @@ namespace ts {
         return rulesProvider;
     }
 
+    const notImplementedHost: RefactorAndCodeFixHost = {};
+
     export function testExtractSymbol(caption: string, text: string, baselineFolder: string, description: DiagnosticMessage) {
         const t = extractTest(text);
         const selectionRange = t.ranges.get("selection");
@@ -125,6 +127,7 @@ namespace ts {
                 file: sourceFile,
                 startPosition: selectionRange.start,
                 endPosition: selectionRange.end,
+                host: notImplementedHost,
                 rulesProvider: getRuleProvider()
             };
             const rangeToExtract = refactor.extractSymbol.getRangeToExtract(sourceFile, createTextSpanFromBounds(selectionRange.start, selectionRange.end));
@@ -188,6 +191,7 @@ namespace ts {
                 file: sourceFile,
                 startPosition: selectionRange.start,
                 endPosition: selectionRange.end,
+                host: notImplementedHost,
                 rulesProvider: getRuleProvider()
             };
             const rangeToExtract = refactor.extractSymbol.getRangeToExtract(sourceFile, createTextSpanFromBounds(selectionRange.start, selectionRange.end));

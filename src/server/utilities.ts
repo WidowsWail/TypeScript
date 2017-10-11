@@ -318,10 +318,4 @@ namespace ts.server {
             deleted(oldItems[oldIndex++]);
         }
     }
-
-    //review
-    //type T = PromiseLike
-    //export class Thenable<T> {
-
-    //}
 }

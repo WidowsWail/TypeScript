@@ -1,10 +1,13 @@
 /// <reference path="project.ts"/>
 
 namespace ts.server {
+    export interface InstallPackageOptionsWithProjectRootPath extends InstallPackageOptions {
+        projectRootPath: Path;
+    }
+
     export interface ITypingsInstaller {
         tryGetRegistry(): Map<void> | undefined;
-        //document me
-        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult>;
+        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeActionCommandResult>;
         enqueueInstallTypingsRequest(p: Project, typeAcquisition: TypeAcquisition, unresolvedImports: SortedReadonlyArray<string>): void;
         attach(projectService: ProjectService): void;
         onProjectClosed(p: Project): void;
@@ -87,7 +90,7 @@ namespace ts.server {
             return this.installer.tryGetRegistry();
         }
 
-        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult> {
+        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeActionCommandResult> {
             return this.installer.installPackage(options);
         }
 

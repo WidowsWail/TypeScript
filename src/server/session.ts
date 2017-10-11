@@ -411,7 +411,7 @@ namespace ts.server {
             this.send(ev);
         }
 
-        //todo: this was apparently public?
+        //todo: this was apparently public? can't change it?
         public output(info: {} | undefined, cmdName: string, reqSeq: number, success: boolean, message?: string) {
             const res: protocol.Response = {
                 seq: 0,
@@ -1544,11 +1544,11 @@ namespace ts.server {
             }
         }
 
-        private applyCodeFixCommand(args: protocol.ApplyCodeFixCommandRequestArgs): { response: {}, successMessage: string } {
+        private applyCodeActionCommand(args: protocol.ApplyCodeActionCommandRequestArgs): { response: {}, successMessage: string } {
             const { file, project } = this.getFileAndProject(args);
-            const promise = project.getLanguageService().applyCodeFixCommand(file, args.command);
+            const promise = project.getLanguageService().applyCodeActionCommand(file, args.command);
             //make it synchronous for now
-            let result: ApplyCodeFixCommandResult;
+            let result: ApplyCodeActionCommandResult;
             promise.then(
                 x => {
                     Debug.assert(!!x);
@@ -1931,8 +1931,8 @@ namespace ts.server {
             [CommandNames.GetCodeFixesFull]: (request: protocol.CodeFixRequest) => {
                 return this.requiredResponse(this.getCodeFixes(request.arguments, /*simplifiedResult*/ false));
             },
-            [CommandNames.ApplyCodeFixCommand]: (request: protocol.ApplyCodeFixCommandRequest) => {
-                const { response, successMessage } = this.applyCodeFixCommand(request.arguments);
+            [CommandNames.ApplyCodeActionCommand]: (request: protocol.ApplyCodeActionCommandRequest) => {
+                const { response, successMessage } = this.applyCodeActionCommand(request.arguments);
                 return this.requiredResponse(response, successMessage);
             },
             [CommandNames.GetSupportedCodeFixes]: () => {

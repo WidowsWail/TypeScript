@@ -1761,13 +1761,11 @@ namespace ts {
             });
         }
 
-        function applyCodeFixCommand(fileName: Path, action: CodeActionCommand): PromiseLike<ApplyCodeFixCommandResult> {
+        function applyCodeActionCommand(fileName: Path, action: CodeActionCommand): PromiseLike<ApplyCodeActionCommandResult> {
+            fileName = toPath(fileName, currentDirectory, getCanonicalFileName);
             switch (action.type) {
                 case "install package":
-                    return host.installPackage({
-                        fileName: toPath(fileName, currentDirectory, getCanonicalFileName),
-                        packageName: action.packageName,
-                    });
+                    return host.installPackage({ fileName, packageName: action.packageName });
                 default:
                     Debug.fail();
                     // TODO: Debug.assertNever(action); will only work if there is more than one type.
@@ -2047,7 +2045,7 @@ namespace ts {
             isValidBraceCompletionAtPosition,
             getSpanOfEnclosingComment,
             getCodeFixesAtPosition,
-            applyCodeFixCommand,
+            applyCodeActionCommand,
             getEmitOutput,
             getNonBoundSourceFile,
             getSourceFile,

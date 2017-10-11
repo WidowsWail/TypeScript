@@ -1097,10 +1097,10 @@ namespace ts {
             private state: PromiseState,
             private result: T | undefined,
             private error: {} | undefined,
-            //Only supports one callback...
+            // Only supports one callback
             private callback: {
-                onfulfilled?: ((value: T) => {}) | undefined | null,
-                onrejected?: ((reason: any) => {}) | undefined | null
+                onfulfilled?: (value: T) => void,
+                onrejected?: (value: {}) => void,
             } | undefined) {}
 
         static deferred<T>(): PromiseImpl<T> {
@@ -1134,11 +1134,35 @@ namespace ts {
             onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
             onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null,
         ): PromiseLike<TResult1 | TResult2> {
+            if (!onfulfilled) {
+                return this as PromiseLike<{}> as PromiseLike<TResult1 | TResult2>;
+            }
+
             switch (this.state) {
-                case PromiseState.Unresolved:
+                case PromiseState.Unresolved: {
+                    const res = PromiseImpl.deferred<TResult1 | TResult2>();
+                    const handle = (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>): void => {
+                        if (isPromiseLike(value)) {
+                            value.then(v => res.resolve(v), e => res.reject(e));
+                        }
+                        else {
+                            res.resolve(value);
+                        }
+                    };
                     Debug.assert(!this.callback);
-                    this.callback = { onfulfilled, onrejected };
-                    new PromiseImpl(PromiseState.Unresolved, undefined, undefined, undefined);
+                    this.callback = {
+                        onfulfilled: value => handle(onfulfilled(value)),
+                        onrejected: err => {
+                            if (onrejected) {
+                                handle(onrejected(err));
+                            }
+                            else {
+                                res.reject(err);
+                            }
+                        },
+                    };
+                    return res;
+                }
                 case PromiseState.Success:
                     return toPromiseLike(onfulfilled(this.result));
                 case PromiseState.Failure:
@@ -1147,8 +1171,12 @@ namespace ts {
         }
     }
 
+    function isPromiseLike<T>(x: T | PromiseLike<T>): x is PromiseLike<T> {
+        return !!(x as any).then;
+    }
+
     function toPromiseLike<T>(x: T | PromiseLike<T>): PromiseLike<T> {
-        return (x as any).then ? x as PromiseLike<T> : PromiseImpl.resolved(x as T);
+        return isPromiseLike(x) ? x as PromiseLike<T> : PromiseImpl.resolved(x as T);
     }
 }
 

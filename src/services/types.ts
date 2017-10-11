@@ -145,11 +145,26 @@ namespace ts {
         isCancellationRequested(): boolean;
     }
 
+    export interface InstallPackageOptions {
+        fileName: Path;
+        packageName: string;
+    }
+
+    /* @internal */
+    export interface RefactorAndCodeFixHost extends GetEffectiveTypeRootsHost {
+        log?(s: string): void;
+        useCaseSensitiveFileNames?(): boolean;
+        fileExists?(path: string): boolean;
+        readFile?(path: string, encoding?: string): string | undefined;
+        tryGetRegistry?(): Map<void> | undefined;
+        installPackage?(options: InstallPackageOptions): PromiseLike<ApplyCodeActionCommandResult>;
+    }
+
     //
     // Public interface of the host of a language service instance.
     //
-    export interface LanguageServiceHost {
-        getCompilationSettings(): CompilerOptions; //also want the location...
+    export interface LanguageServiceHost extends RefactorAndCodeFixHost {
+        getCompilationSettings(): CompilerOptions;
         getNewLine?(): string;
         getProjectVersion?(): string;
         getScriptFileNames(): string[];
@@ -158,20 +173,15 @@ namespace ts {
         getScriptSnapshot(fileName: string): IScriptSnapshot | undefined;
         getLocalizedDiagnosticMessages?(): any;
         getCancellationToken?(): HostCancellationToken;
-        getCurrentDirectory(): string;
         getDefaultLibFileName(options: CompilerOptions): string;
-        log?(s: string): void;
         trace?(s: string): void;
         error?(s: string): void;
-        useCaseSensitiveFileNames?(): boolean;
 
         /*
          * LS host can optionally implement these methods to support completions for module specifiers.
          * Without these methods, only completions for ambient modules will be provided.
          */
         readDirectory?(path: string, extensions?: ReadonlyArray<string>, exclude?: ReadonlyArray<string>, include?: ReadonlyArray<string>, depth?: number): string[];
-        readFile?(path: string, encoding?: string): string | undefined;
-        fileExists?(path: string): boolean;
 
         /*
          * LS host can optionally implement these methods to support automatic updating when new type libraries are installed
@@ -187,7 +197,6 @@ namespace ts {
         resolveTypeReferenceDirectives?(typeDirectiveNames: string[], containingFile: string): ResolvedTypeReferenceDirective[];
         /* @internal */ hasInvalidatedResolution?: HasInvalidatedResolution;
         /* @internal */ hasChangedAutomaticTypeDirectiveNames?: boolean;
-        directoryExists?(directoryName: string): boolean;
 
         /*
          * getDirectories is also required for full import and type reference completions. Without it defined, certain
@@ -199,12 +208,6 @@ namespace ts {
          * Gets a set of custom transformers to use during emit.
          */
         getCustomTransformers?(): CustomTransformers | undefined;
-
-        /* @internal */
-        //TODO: optional (for back-compat)
-        tryGetRegistry(): Map<void> | undefined;
-        installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeFixCommandResult>;
-        //getTsconfigLocation(): Path | undefined;
     }
 
     //
@@ -281,10 +284,7 @@ namespace ts {
         getSpanOfEnclosingComment(fileName: string, position: number, onlyMultiLine: boolean): TextSpan;
 
         getCodeFixesAtPosition(fileName: string, start: number, end: number, errorCodes: number[], formatOptions: FormatCodeSettings): CodeAction[];
-        //TODO: this will be public, so think about api
-        //Or just make it internal.
-        //currently: returns success message, or throws error for error message
-        applyCodeFixCommand(fileName: string, action: CodeActionCommand): PromiseLike<ApplyCodeFixCommandResult>;
+        applyCodeActionCommand(fileName: string, action: CodeActionCommand): PromiseLike<ApplyCodeActionCommandResult>;
         getApplicableRefactors(fileName: string, positionOrRaneg: number | TextRange): ApplicableRefactorInfo[];
         getEditsForRefactor(fileName: string, formatOptions: FormatCodeSettings, positionOrRange: number | TextRange, refactorName: string, actionName: string): RefactorEditInfo | undefined;
 
@@ -304,8 +304,7 @@ namespace ts {
         dispose(): void;
     }
 
-    //!
-    export interface ApplyCodeFixCommandResult {
+    export interface ApplyCodeActionCommandResult {
         successMessage: string;
     }
 
@@ -393,8 +392,8 @@ namespace ts {
     export type CodeActionCommand = InstallPackageAction;
 
     export interface InstallPackageAction {
-        /* @internal */ type: "install package",
-        /* @internal */ packageName: string,
+        /* @internal */ type: "install package";
+        /* @internal */ packageName: string;
     }
 
     /**
@@ -448,7 +447,6 @@ namespace ts {
         edits: FileTextChanges[];
         renameFilename: string | undefined;
         renameLocation: number | undefined;
-        //new!
         commands?: CodeActionCommand[];
     }
 

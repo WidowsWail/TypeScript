@@ -94,7 +94,7 @@ namespace ts.server.protocol {
         BreakpointStatement = "breakpointStatement",
         CompilerOptionsForInferredProjects = "compilerOptionsForInferredProjects",
         GetCodeFixes = "getCodeFixes",
-        ApplyCodeFixCommand = "applyCodeFixCommand",
+        ApplyCodeActionCommand = "applyCodeActionCommand",
         /* @internal */
         GetCodeFixesFull = "getCodeFixes-full",
         GetSupportedCodeFixes = "getSupportedCodeFixes",
@@ -179,9 +179,9 @@ namespace ts.server.protocol {
         command: string;
 
         /**
-         * Contains error message if success === false.
+         * If success === false, this should always be provided.
+         * Otherwise, may (or may not) contain a success message.
          */
-        //Actually, can now contain a success mussage too.
         message?: string;
 
         /**
@@ -522,14 +522,13 @@ namespace ts.server.protocol {
         arguments: CodeFixRequestArgs;
     }
 
-    //!
-    export interface ApplyCodeFixCommandRequest extends Request {
-        command: CommandTypes.ApplyCodeFixCommand;
-        arguments: ApplyCodeFixCommandRequestArgs;
+    export interface ApplyCodeActionCommandRequest extends Request {
+        command: CommandTypes.ApplyCodeActionCommand;
+        arguments: ApplyCodeActionCommandRequestArgs;
     }
 
-    //success/failure and message go in the usual places... so nothing goes here...
-    export interface ApplyCodeFixCommandResponse extends Response {}
+    // All we need is the `success` and `message` fields of Response.
+    export interface ApplyCodeActionCommandResponse extends Response {}
 
     export interface FileRangeRequestArgs extends FileRequestArgs {
         /**
@@ -575,7 +574,7 @@ namespace ts.server.protocol {
         errorCodes?: number[];
     }
 
-    export interface ApplyCodeFixCommandRequestArgs extends FileRequestArgs {
+    export interface ApplyCodeActionCommandRequestArgs extends FileRequestArgs {
         command: CodeActionCommand; //TODO: should just be `{}` from the protocol's perspective
     }
 

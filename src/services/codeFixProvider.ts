@@ -11,7 +11,7 @@ namespace ts {
         span: TextSpan;
         program: Program;
         newLineCharacter: string;
-        host: LanguageServiceHost;
+        host: RefactorAndCodeFixHost;
         cancellationToken: CancellationToken;
         rulesProvider: formatting.RulesProvider;
     }

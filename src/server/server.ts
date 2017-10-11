@@ -259,7 +259,7 @@ namespace ts.server {
         // buffer, but we have yet to find a way to retrieve that value.
         private static readonly maxActiveRequestCount = 10;
         private static readonly requestDelayMillis = 100;
-        private packageInstalledPromise: PromiseImpl<ApplyCodeFixCommandResult>;
+        private packageInstalledPromise: PromiseImpl<ApplyCodeActionCommandResult>;
 
         constructor(
             private readonly telemetryEnabled: boolean,
@@ -288,7 +288,7 @@ namespace ts.server {
             return undefined;
         }
 
-        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeFixCommandResult> {
+        installPackage(options: InstallPackageOptionsWithProjectRootPath): PromiseLike<ApplyCodeActionCommandResult> {
             this.send({ kind: "installPackage", ...options });
             Debug.assert(this.packageInstalledPromise === undefined);
             this.packageInstalledPromise = PromiseImpl.deferred();
@@ -313,7 +313,7 @@ namespace ts.server {
             this.eventSender = telemetrySender;
         }
 
-        attach(projectService: ProjectService) { //This method has little to do with `projectService`...
+        attach(projectService: ProjectService) {
             this.projectService = projectService;
             if (this.logger.hasLevel(LogLevel.requestTime)) {
                 this.logger.info("Binding...");

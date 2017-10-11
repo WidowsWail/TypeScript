@@ -70,13 +70,8 @@ namespace ts.projectSystem {
 
         protected postExecActions: PostExecAction[] = [];
 
-        //TODO: have unit tests for these?
-        tryGetRegistry(): Map<void> | undefined {
-            throw new Error("TODO");
-        }
-        installPackage(): never {
-            throw new Error("TODO");
-        }
+        tryGetRegistry = notImplemented;
+        installPackage = notImplemented;
 
         executePendingCommands() {
             const actionsToRun = this.postExecActions;

@@ -249,7 +249,7 @@ namespace ts.server {
         tryGetRegistry(): Map<void> | undefined {
             return this.typingsCache.tryGetRegistry();
         }
-        installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeFixCommandResult> {
+        installPackage(options: InstallPackageOptions): PromiseLike<ApplyCodeActionCommandResult> {
             const projectRootPath = this.getProjectRootPath() as Path;
             return this.typingsCache.installPackage({ ...options, projectRootPath });
         }

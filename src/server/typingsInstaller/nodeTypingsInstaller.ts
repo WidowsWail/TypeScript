@@ -99,7 +99,6 @@ namespace ts.server.typingsInstaller {
 
             this.ensurePackageDirectoryExists(globalTypingsCacheLocation);
 
-            //And here's where we install it -- upon creating the process basically.
             try {
                 if (this.log.isEnabled()) {
                     this.log.writeLine(`Updating ${TypesRegistryPackageName} npm package...`);

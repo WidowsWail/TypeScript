@@ -28,13 +28,11 @@ declare namespace ts.server {
         " __sortedArrayBrand": any;
     }
 
-    //todo: this was public for some reason? Can we kill it?
     export interface TypingInstallerRequestWithProjectName {
         readonly projectName: string;
     }
 
     /* @internal */
-    //already internal?
     export type TypingInstallerRequestUnion = DiscoverTypings | CloseProject | TypesRegistryRequest | InstallPackageRequest;
 
     export interface DiscoverTypings extends TypingInstallerRequestWithProjectName {
@@ -71,11 +69,9 @@ declare namespace ts.server {
     export interface TypingInstallerResponse {
         readonly kind: ActionSet | ActionInvalidate | EventTypesRegistry | EventPackageInstalled | EventBeginInstallTypes | EventEndInstallTypes | EventInitializationFailed;
     }
-    //already internal?
     /* @internal */
     export type TypingInstallerResponseUnion = SetTypings | InvalidateCachedTypings | TypesRegistryResponse | PackageInstalledResponse | InstallTypes | InitializationFailedResponse;
 
-    //TODO:are these all internal?
     /* @internal */
     export interface TypesRegistryResponse extends TypingInstallerResponse {
         readonly kind: EventTypesRegistry;

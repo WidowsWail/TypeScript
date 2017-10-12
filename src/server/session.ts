@@ -1543,22 +1543,13 @@ namespace ts.server {
             }
         }
 
-        private applyCodeActionCommand(args: protocol.ApplyCodeActionCommandRequestArgs): { response: {}, successMessage: string } {
+        private applyCodeActionCommand(commandName: string, requestSeq: number, args: protocol.ApplyCodeActionCommandRequestArgs): void {
             const { file, project } = this.getFileAndProject(args);
-            const promise = project.getLanguageService().applyCodeActionCommand(file, args.command);
-            //make it synchronous for now
-            let result: ApplyCodeActionCommandResult;
-            promise.then(
-                x => {
-                    Debug.assert(!!x);
-                    result = x;
-                },
-                err => {
-                    throw err;
-                });
-            while (!result) {}
-            const { successMessage } = result;
-            return { response: {}, successMessage };
+            const output = (success: boolean, message: string) => this.output({}, commandName, requestSeq, success, message);
+            const command = args.command as CodeActionCommand; // They should be sending back the command we sent them.
+            project.getLanguageService().applyCodeActionCommand(file, command).then(
+                ({ successMessage }) => { output(/*success*/ true, successMessage); },
+                error => { output(/*success*/ false, error); });
         }
 
         private getStartAndEndPosition(args: protocol.FileRangeRequestArgs, scriptInfo: ScriptInfo) {
@@ -1931,8 +1922,8 @@ namespace ts.server {
                 return this.requiredResponse(this.getCodeFixes(request.arguments, /*simplifiedResult*/ false));
             },
             [CommandNames.ApplyCodeActionCommand]: (request: protocol.ApplyCodeActionCommandRequest) => {
-                const { response, successMessage } = this.applyCodeActionCommand(request.arguments);
-                return this.requiredResponse(response, successMessage);
+                this.applyCodeActionCommand(request.command, request.seq, request.arguments);
+                return this.notRequired(); // Response will come asynchronously.
             },
             [CommandNames.GetSupportedCodeFixes]: () => {
                 return this.requiredResponse(this.getSupportedCodeFixes());

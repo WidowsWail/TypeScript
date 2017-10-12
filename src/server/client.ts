@@ -14,7 +14,7 @@ namespace ts.server {
     }
 
     /* @internal */
-    export function extractMessage(message: string) {
+    export function extractMessage(message: string): string {
         // Read the content length
         const contentLengthPrefix = "Content-Length: ";
         const lines = message.split(/\r?\n/);
@@ -32,6 +32,7 @@ namespace ts.server {
         return responseBody;
     }
 
+    //Is this test-only???
     export class SessionClient implements LanguageService {
         private sequence = 0;
         private lineMaps: Map<number[]> = createMap<number[]>();
@@ -545,9 +546,9 @@ namespace ts.server {
 
             const request = this.processRequest<protocol.ApplyCodeActionCommandRequest>(CommandNames.ApplyCodeActionCommand, args);
             //TODO: how can we possibly get it synchronously here?
+            //But see comment at top: is this test-only?
             const response = this.processResponse<protocol.ApplyCodeActionCommandResponse>(request);
 
-            //This would have thrown an error in `processResponse` if not `response.success`.
             return PromiseImpl.resolved({ successMessage: response.message });
         }
 

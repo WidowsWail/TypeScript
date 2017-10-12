@@ -126,6 +126,8 @@ namespace ts.server.protocol {
      * Client-initiated request message
      */
     export interface Request extends Message {
+        type: "request";
+
         /**
          * The command to execute
          */
@@ -148,6 +150,8 @@ namespace ts.server.protocol {
      * Server-initiated event message
      */
     export interface Event extends Message {
+        type: "event";
+
         /**
          * Name of event
          */
@@ -163,6 +167,8 @@ namespace ts.server.protocol {
      * Response by server to client request message.
      */
     export interface Response extends Message {
+        type: "response";
+
         /**
          * Sequence number of the request message.
          */
@@ -575,7 +581,7 @@ namespace ts.server.protocol {
     }
 
     export interface ApplyCodeActionCommandRequestArgs extends FileRequestArgs {
-        command: CodeActionCommand; //TODO: should just be `{}` from the protocol's perspective
+        command: {};
     }
 
     /**
@@ -1937,6 +1943,7 @@ namespace ts.server.protocol {
     /**
      * Event that is sent when server have finished processing request with specified id.
      */
+    //interesting that we even have this... too bad it doesn't come with a body.
     export interface RequestCompletedEvent extends Event {
         event: RequestCompletedEventName;
         body: RequestCompletedEventBody;
@@ -1944,6 +1951,10 @@ namespace ts.server.protocol {
 
     export interface RequestCompletedEventBody {
         request_seq: number;
+        //default is true
+        success?: boolean;
+        //!!!!!!
+        message?: string;
     }
 
     /**

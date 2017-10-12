@@ -1943,7 +1943,6 @@ namespace ts.server.protocol {
     /**
      * Event that is sent when server have finished processing request with specified id.
      */
-    //interesting that we even have this... too bad it doesn't come with a body.
     export interface RequestCompletedEvent extends Event {
         event: RequestCompletedEventName;
         body: RequestCompletedEventBody;
@@ -1951,10 +1950,6 @@ namespace ts.server.protocol {
 
     export interface RequestCompletedEventBody {
         request_seq: number;
-        //default is true
-        success?: boolean;
-        //!!!!!!
-        message?: string;
     }
 
     /**

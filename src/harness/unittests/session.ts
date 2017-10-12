@@ -315,7 +315,7 @@ namespace ts.server {
                     item: false
                 };
                 const command = "newhandle";
-                const result: ts.server.Handled = {
+                const result: ts.server.HandlerResponse = {
                     response: respBody,
                     responseRequired: true
                 };
@@ -332,7 +332,7 @@ namespace ts.server {
                 const respBody = {
                     item: false
                 };
-                const resp: ts.server.Handled = {
+                const resp: ts.server.HandlerResponse = {
                     response: respBody,
                     responseRequired: true
                 };

@@ -405,7 +405,6 @@ namespace ts.server {
             switch (response.kind) {
                 case EventTypesRegistry:
                     this.typesRegistryCache = ts.createMapFromTemplate(response.typesRegistry);
-                    //TODO: logging?
                     break;
                 case EventPackageInstalled: {
                     const { success, message } = response;

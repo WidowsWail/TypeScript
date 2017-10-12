@@ -32,7 +32,6 @@ namespace ts.server {
         return responseBody;
     }
 
-    //Is this test-only???
     export class SessionClient implements LanguageService {
         private sequence = 0;
         private lineMaps: Map<number[]> = createMap<number[]>();
@@ -545,8 +544,7 @@ namespace ts.server {
             const args: protocol.ApplyCodeActionCommandRequestArgs = { file, command };
 
             const request = this.processRequest<protocol.ApplyCodeActionCommandRequest>(CommandNames.ApplyCodeActionCommand, args);
-            //TODO: how can we possibly get it synchronously here?
-            //But see comment at top: is this test-only?
+            // TODO: how can we possibly get it synchronously here? But is SessionClient test-only?
             const response = this.processResponse<protocol.ApplyCodeActionCommandResponse>(request);
 
             return PromiseImpl.resolved({ successMessage: response.message });

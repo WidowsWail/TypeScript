@@ -1574,15 +1574,12 @@ namespace ts.server {
             return { startPosition, endPosition };
         }
 
-        private mapCodeAction({ description, changes, commands }: CodeAction, scriptInfo: ScriptInfo): protocol.CodeAction {
-            return {
-                description: description,
-                changes: changes.map(change => ({
-                    fileName: change.fileName,
-                    textChanges: change.textChanges.map(textChange => this.convertTextChangeToCodeEdit(textChange, scriptInfo))
-                })),
-                commands,
-            };
+        private mapCodeAction({ description, changes: unmappedChanges, commands }: CodeAction, scriptInfo: ScriptInfo): protocol.CodeAction {
+            const changes = unmappedChanges.map(change => ({
+                fileName: change.fileName,
+                textChanges: change.textChanges.map(textChange => this.convertTextChangeToCodeEdit(textChange, scriptInfo))
+            }));
+            return { description,  changes, commands };
         }
 
         private mapTextChangesToCodeEdits(project: Project, textChanges: FileTextChanges): protocol.FileCodeEdits {
@@ -1668,15 +1665,15 @@ namespace ts.server {
         exit() {
         }
 
-        private notRequired(): Handled {
+        private notRequired(): HandlerResponse {
             return { responseRequired: false };
         }
 
-        private requiredResponse(response: {}, successMessage?: string): Handled {
-            return { response, responseRequired: true, successMessage };
+        private requiredResponse(response: {}): HandlerResponse {
+            return { response, responseRequired: true };
         }
 
-        private handlers = createMapFromTemplate<(request: protocol.Request) => Handled>({
+        private handlers = createMapFromTemplate<(request: protocol.Request) => HandlerResponse>({
             [CommandNames.OpenExternalProject]: (request: protocol.OpenExternalProjectRequest) => {
                 this.projectService.openExternalProject(request.arguments, /*suppressRefreshOfInferredProjects*/ false);
                 // TODO: report errors
@@ -1939,7 +1936,7 @@ namespace ts.server {
             }
         });
 
-        public addProtocolHandler(command: string, handler: (request: protocol.Request) => Handled) {
+        public addProtocolHandler(command: string, handler: (request: protocol.Request) => HandlerResponse) {
             if (this.handlers.has(command)) {
                 throw new Error(`Protocol handler already exists for command "${command}"`);
             }
@@ -1968,7 +1965,7 @@ namespace ts.server {
             }
         }
 
-        public executeCommand(request: protocol.Request): Handled {
+        public executeCommand(request: protocol.Request): HandlerResponse {
             const handler = this.handlers.get(request.command);
             if (handler) {
                 return this.executeWithRequestId(request.seq, () => handler(request));
@@ -1993,7 +1990,7 @@ namespace ts.server {
             let request: protocol.Request;
             try {
                 request = <protocol.Request>JSON.parse(message);
-                const { response, responseRequired, successMessage } = this.executeCommand(request);
+                const { response, responseRequired } = this.executeCommand(request);
 
                 if (this.logger.hasLevel(LogLevel.requestTime)) {
                     const elapsedTime = hrTimeToMilliseconds(this.hrtime(start)).toFixed(4);
@@ -2001,13 +1998,12 @@ namespace ts.server {
                         this.logger.perftrc(`${request.seq}::${request.command}: elapsed time (in milliseconds) ${elapsedTime}`);
                     }
                     else {
-                        //... responseRequired has nothing to do with async ...
                         this.logger.perftrc(`${request.seq}::${request.command}: async elapsed time (in milliseconds) ${elapsedTime}`);
                     }
                 }
 
                 if (response) {
-                    this.output(response, request.command, request.seq, /*success*/ true, successMessage);
+                    this.output(response, request.command, request.seq, /*success*/ true);
                 }
                 else if (responseRequired) {
                     this.output(undefined, request.command, request.seq, /*success*/ false, "No content available.");
@@ -2030,10 +2026,8 @@ namespace ts.server {
         }
     }
 
-    //mv
-    export interface Handled {
+    export interface HandlerResponse {
         response?: {};
         responseRequired?: boolean;
-        successMessage?: string; //used for success
     }
 }

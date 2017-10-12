@@ -6,9 +6,7 @@ namespace ts.codefix {
             Diagnostics.Could_not_find_a_declaration_file_for_module_0_1_implicitly_has_an_any_type.code,
         ],
         getCodeActions: context => {
-            const { sourceFile } = context;
-            const { start } = context.span;
-
+            const { sourceFile, span: { start } } = context;
             const token = getTokenAtPosition(sourceFile, start, /*includeJsDocComment*/ false);
             if (!isStringLiteral(token)) {
                 throw Debug.fail(); // These errors should only happen on the module name.
@@ -19,13 +17,12 @@ namespace ts.codefix {
         },
     });
 
-    export function tryGetCodeActionForInstallPackageTypes(host: RefactorAndCodeFixHost, packageName: string): CodeAction | undefined {
+    export function tryGetCodeActionForInstallPackageTypes(host: RefactorAndCodeFixHost, moduleName: string): CodeAction | undefined {
+        const { packageName } = getPackageName(moduleName);
+
         // We want to avoid looking this up in the registry as that is expensive. So first check that it's actually an NPM package.
         const validationResult = validatePackageName(packageName);
         if (validationResult !== PackageNameValidationResult.Ok) {
-            if (host.log) {
-                host.log(renderPackageNameValidationFailure(validationResult, packageName));
-            }
             return undefined;
         }
 

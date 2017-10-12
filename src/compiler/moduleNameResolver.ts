@@ -989,7 +989,8 @@ namespace ts {
         return withPackageId(packageId, pathAndExtension);
     }
 
-    function getPackageName(moduleName: string): { packageName: string, rest: string } {
+    /* @internal */
+    export function getPackageName(moduleName: string): { packageName: string, rest: string } {
         let idx = moduleName.indexOf(directorySeparator);
         if (moduleName[0] === "@") {
             idx = moduleName.indexOf(directorySeparator, idx + 1);

@@ -1,6 +1,6 @@
 /// <reference path='fourslash.ts' />
 
-////import * as abs from "/*a*/abs/*b*/";
+////import * as abs from "/*a*/abs/subModule/*b*/";
 
 test.setTypesRegistry({
     "abs": undefined,

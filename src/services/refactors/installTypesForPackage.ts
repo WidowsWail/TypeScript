@@ -6,7 +6,7 @@ namespace ts.refactor.installTypesForPackage {
         name: "Install missing types package",
         description: "Install missing types package",
         getEditsForAction,
-        getAvailableActions
+        getAvailableActions,
     };
 
     registerRefactor(installTypesForPackage);
@@ -26,9 +26,9 @@ namespace ts.refactor.installTypesForPackage {
                     {
                         description: action.description,
                         name: actionName,
-                    }
-                ]
-            }
+                    },
+                ],
+            },
         ];
     }
 
@@ -46,10 +46,18 @@ namespace ts.refactor.installTypesForPackage {
     function getAction(context: RefactorContext): CodeAction | undefined {
         const { file, startPosition } = context;
         const node = getTokenAtPosition(file, startPosition, /*includeJsDocComment*/ false);
-        if (isStringLiteral(node)
-            && node.parent.kind === SyntaxKind.ImportDeclaration
-            && getResolvedModule(file, node.text) === undefined) {
+        if (isStringLiteral(node) && isModuleIdentifier(node) && getResolvedModule(file, node.text) === undefined) {
             return codefix.tryGetCodeActionForInstallPackageTypes(context.host, node.text);
+        }
+    }
+
+    function isModuleIdentifier(node: StringLiteral): boolean {
+        switch (node.parent.kind) {
+            case SyntaxKind.ImportDeclaration:
+            case SyntaxKind.ExternalModuleReference:
+                return true;
+            default:
+                return false;
         }
     }
 }
